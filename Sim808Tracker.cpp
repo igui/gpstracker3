@@ -1,6 +1,7 @@
 #include "Sim808Tracker.h"
 #include "Timeout.h"
 #include <HardwareSerial.h>
+#include <Arduino.h>
 
 using namespace Sim808;
 
@@ -43,21 +44,22 @@ bool Tracker::tryReadLine(
 }
 
 bool Tracker::init() {
+    readBuffer.reset();
     cellSerial.println(F("AT"));
     if(!tryReadLine(F("OK"), 2000)) {
-        Serial.println(F("AT FAIL"));
+        return false;
     }
     cellSerial.println(F("AT+CIPSHUT"));
     if(!tryReadLine(F("SHUT OK"), 2000)) {
-        Serial.println(F("AT+CIPSHUT FAIL"));
+        return false;
     }
     cellSerial.println(F("AT+CREG?"));
     if(!tryReadLine(F("OK"), 2000)) {
-        Serial.println(F("AT+CREG? FAIL"));
+        return false;
     }
     cellSerial.println(F("AT+CGATT=1"));
     if(!tryReadLine(F("OK"), 2000)) {
-        Serial.println(F("AT+CGATT FAIL"));
+        return false;
     }
 
     cellSerial.print(F("AT+CSTT=\""));
@@ -68,17 +70,28 @@ bool Tracker::init() {
     cellSerial.print((const __FlashStringHelper *)parameters.password);
     cellSerial.println(F("\""));
     if(!tryReadLine(F("OK"), 2000)) {
-        Serial.println(F("AT+CSTT FAIL"));
+        return false;
     }
 
     cellSerial.println(F("AT+CGPSPWR=1"));
     if(!tryReadLine(F("OK"), 2000)) {
-        Serial.println(F("AT+CSTT FAIL"));
+        return false;
     }
+
+    return true;
 }
 
 void Tracker::run() {
-    
+    while(true) {
+        Serial.println(F("Init"));
+        if(!init()) {
+            Serial.println(F("INIT PHASE FAIL"));
+            delay(1000);
+            continue;
+        }
+        break;
+    }
 
+    Serial.println(F("PROGRAM END"));
     while(true) {}
 }

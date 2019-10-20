@@ -36,7 +36,7 @@ void setup() {
     digitalWrite(LED1, HIGH);
     digitalWrite(LED2, HIGH);
     tracker.setup();
-    Serial.println(F("Init"));
+    Serial.println(F("SETUP DONE"));
 }
 
 void loop() {

@@ -6,8 +6,6 @@
 #include "HardwareSerial.h"
 #include "Timeout.h"
 
-extern HardwareSerial Serial;
-
 namespace Sim808 {
     /**
      * A buffer of fixed length

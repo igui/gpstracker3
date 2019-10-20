@@ -10,6 +10,7 @@ namespace Sim808 {
         const Parameters &parameters;
         SoftwareSerial cellSerial;
         Buffer<TrackerBufSize> readBuffer;
+        Buffer<TrackerBufSize> gpsLine;
     public:
         Tracker(const Parameters &parameters);
         void setup();
@@ -17,6 +18,7 @@ namespace Sim808 {
         void run();
     private:
         bool init();
+        bool readGPS();
 
         bool tryReadLine(const __FlashStringHelper *line,
             unsigned long timeout);
