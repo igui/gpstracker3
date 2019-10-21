@@ -5,6 +5,7 @@
 
 namespace Sim808 {
     const int TrackerBufSize = 100;
+    const int ShortReadTimeout = 2000;
     class Tracker {
     private:
         const Parameters &parameters;
