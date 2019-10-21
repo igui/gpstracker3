@@ -5,6 +5,7 @@
 #include "SoftwareSerial.h"
 #include "HardwareSerial.h"
 #include "Timeout.h"
+#include "Regex.h"
 
 namespace Sim808 {
     /**
@@ -75,6 +76,31 @@ namespace Sim808 {
                 buf[written - 2] == '\r';
         }
 
+        bool startsWith(const __FlashStringHelper *_val) const {
+            const char *val = (const char *)(_val);
+            auto lenVal = strlen_P(val);
+            if(lenVal > written) {
+                return false;
+            }
+            for(size_t i = 0; i < lenVal; ++i) {
+                char c = pgm_read_byte(val + i);
+                if(c != buf[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        bool isAnIPCRLF() const {
+            return isAnIP(buf, written - 2);
+        }
+
+        Buffer& operator=(const Buffer& other) {
+            written = other.written;
+            memcpy(buf, other.buf, written);
+            return *this;
+        }
+
         /**
          * Returns true if the buffer equals to a string, except the CRLF ending
          */
@@ -90,27 +116,6 @@ namespace Sim808 {
                 }
             }
             return true;
-        }
-
-        /**
-         *  Attempts to read a CRLF ended from a Serial input before the 
-         *  timeout expires
-         */ 
-        void tryReadLine(SoftwareSerial &inputSerial, const Timeout &timeout) {
-            while(true) {
-                if(inputSerial.available()) {
-                    char c = inputSerial.read();
-                    write(c);
-                    if(isCRLF()) {
-                        return;
-                    }
-                    continue;
-                }
-
-                if(timeout.expired()) {
-                    return;
-                }
-            }
         }
     };    
 }
