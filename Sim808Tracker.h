@@ -2,14 +2,17 @@
 #define SIM808TRACKER_H
 
 #include "Parameters.h"
+#include <AES.h>
 
 namespace Sim808 {
-    const int TrackerBufSize = 100;
-    const int ShortReadTimeout = 2000;
+    const int TrackerBufSize = 128;
+    const int ShortReadTimeout = 5000;
     class Tracker {
     private:
         const Parameters &parameters;
         SoftwareSerial cellSerial;
+        AES aes;
+        uint8_t cipherMessage[N_BLOCK + TrackerBufSize];
         Buffer<TrackerBufSize> readBuffer;
         Buffer<TrackerBufSize> gpsLine;
     public:

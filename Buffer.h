@@ -15,12 +15,34 @@ namespace Sim808 {
     class Buffer: public Printable
     {
     private:
-        char buf[BUF_SIZE];
+        uint8_t buf[BUF_SIZE];
         size_t written;
     public:
         Buffer(): written(0) { 
             memset(buf, 0, BUF_SIZE);
         };
+
+        /**
+         * Gets a pointer to the buffer data
+         */
+        uint8_t *getBuf() {
+            return buf;
+        }
+
+        /**
+         * Debugs the buffer into the Serial port
+         */
+        void debug() {
+            for(size_t i = 0; i < written; ++i) {
+                Serial.print(F("BUF["));
+                Serial.print(i);
+                Serial.print(F("] = "));
+                Serial.print((char)buf[i]);
+                Serial.print("  0x");
+                Serial.print(buf[i], HEX);
+                Serial.println();
+            }
+        }
 
         /**
          * Reset the buffer to an empty buffer again
@@ -48,7 +70,7 @@ namespace Sim808 {
          * Inserts a char at the end of the buffer, if it's not full. Returns
          * true if we written a character
          */
-        bool write(char c) {
+        bool write(uint8_t c) {
             if(full()) {
                 return false;
             }
@@ -83,7 +105,7 @@ namespace Sim808 {
                 return false;
             }
             for(size_t i = 0; i < lenVal; ++i) {
-                char c = pgm_read_byte(val + i);
+                uint8_t c = pgm_read_byte(val + i);
                 if(c != buf[i]) {
                     return false;
                 }
@@ -92,7 +114,7 @@ namespace Sim808 {
         }
 
         bool isAnIPCRLF() const {
-            return isAnIP(buf, written - 2);
+            return isAnIP((char *)buf, written - 2);
         }
 
         Buffer& operator=(const Buffer& other) {

@@ -9,8 +9,6 @@ bool Tracker::tryReadGPSLine() {
     
     while(true) {
         tryReadLine(timeout);
-        Serial.print(readBuffer);
-
         if(readBuffer.isCRLF() && readBuffer.startsWith(F("+CGPSINF:"))) {
             return true;
         }

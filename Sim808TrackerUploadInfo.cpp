@@ -1,4 +1,5 @@
 #include "Sim808Tracker.h"
+#include "config.h"
 
 using namespace Sim808;
 
@@ -11,8 +12,6 @@ bool Tracker::tryReadIP() {
     
     while(true) {
         tryReadLine(timeout);
-        Serial.print(readBuffer);
-
         if(readBuffer.isCRLF() && readBuffer.isAnIPCRLF()) {
             readBuffer.reset();
             return true;
@@ -29,6 +28,7 @@ bool Tracker::tryReadIP() {
 
 bool Tracker::uploadInfo() {
     readBuffer.reset();
+    aes.iv_inc();
 
     // Check if the cell serial is up
     cellSerial.println(F("AT"));
@@ -52,16 +52,24 @@ bool Tracker::uploadInfo() {
         return false;
     }
 
+    aes.do_aes_encrypt(
+        readBuffer.getBuf(),
+        TrackerBufSize, 
+        cipherMessage,
+        ENCRYPTION_KEY,
+        ENCRYPTION_KEY_BITS);
+
     cellSerial.print(F("AT+CIPSEND="));
-    cellSerial.print(gpsLine.length(), 10);
+    cellSerial.print(sizeof(cipherMessage), 10);
     cellSerial.println();
 
     // delay 1sec 
     // TODO wait for "> " prompt 
     delay(1000);
 
-    cellSerial.print(gpsLine);
-    if(!tryReadLine(F("SEND OK"), ConnectTimeout)) {
+    cellSerial.write(cipherMessage, sizeof(cipherMessage));
+    cellSerial.println();
+    if(!tryReadLine(F("SEND OK"), ShortReadTimeout)) {
         return false;
     }
 

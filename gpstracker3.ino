@@ -3,7 +3,6 @@
 
 #include "Sim808Tracker.h"
 
-
 extern HardwareSerial Serial;
 
 const char apn[] PROGMEM = "antel.lte";
@@ -30,11 +29,17 @@ const int LED1 = 12;
 const int LED2 = 13;
 
 void setup() {
+    // Initial Serial port communication
     Serial.begin(9600);
+    // Init LED
     pinMode(LED1, OUTPUT);
     pinMode(LED2, OUTPUT);
     digitalWrite(LED1, HIGH);
     digitalWrite(LED2, HIGH);
+    // Initialize random seed generator
+    randomSeed(analogRead(0));
+    
+    // Initialize tracker
     tracker.setup();
     Serial.println(F("SETUP DONE"));
 }

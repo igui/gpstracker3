@@ -9,7 +9,8 @@ bool Tracker::tryReadLine(const Timeout &timeout) {
         if(cellSerial.available()) {
             char c = cellSerial.read();
             readBuffer.write(c);
-            if(readBuffer.isCRLF()) {
+            Serial.write(c);
+            if(readBuffer.isCRLF() || readBuffer.full()) {
                 return true;
             }
             continue;
@@ -29,7 +30,6 @@ bool Tracker::tryReadLine(
     
     while(true) {
         tryReadLine(timeout);
-        Serial.print(readBuffer);
 
         if(readBuffer.equalsCRLF(expected)) {
             readBuffer.reset();
@@ -37,6 +37,7 @@ bool Tracker::tryReadLine(
         }
         if(timeout.expired()) {
             Serial.println(F("EXPIRED"));
+            readBuffer.debug();
             readBuffer.reset();
             return false;
         }
