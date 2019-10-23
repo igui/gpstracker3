@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
-
 #include "Sim808Tracker.h"
 
 extern HardwareSerial Serial;

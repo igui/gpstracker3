@@ -6,9 +6,6 @@ using namespace Sim808;
 bool Tracker::init() {
     readBuffer.reset();
     gpsLine.reset();
-    memset(cipherMessage, 0, sizeof(cipherMessage));
-    aes.set_IV(random());
-
     // Basic command to check if the Cell Serial works
     cellSerial.println(F("AT"));
     if(!tryReadLine(F("OK"), ShortReadTimeout)) {

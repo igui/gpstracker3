@@ -12,7 +12,6 @@ namespace Sim808 {
         const Parameters &parameters;
         SoftwareSerial cellSerial;
         AES aes;
-        uint8_t cipherMessage[N_BLOCK + TrackerBufSize];
         Buffer<TrackerBufSize> readBuffer;
         Buffer<TrackerBufSize> gpsLine;
     public:

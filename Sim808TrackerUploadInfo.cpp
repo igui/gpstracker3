@@ -26,9 +26,37 @@ bool Tracker::tryReadIP() {
     }
 }
 
+int cipherMessage(
+        AES &aes,
+        Buffer<TrackerBufSize> &clearText,
+        Buffer<TrackerBufSize> &cipher,
+        uint8_t iv[N_BLOCK]) {
+    
+    // CBC initialization vector; real iv = iv x2 ex: 01234567 = 012345670123456
+    const unsigned long long int myIv = 302557092;
+    const int plainSize = clearText.length();
+
+    aes.iv_inc();
+    
+    aes.set_IV(myIv);
+    aes.get_IV(iv);
+
+    aes.do_aes_encrypt(
+        clearText.getBuf(),
+        plainSize,
+        cipher.getBuf(),
+        (uint8_t *) ENCRYPTION_KEY,
+        ENCRYPTION_KEY_BITS,
+        iv);
+
+    aes.set_IV(myIv);
+    aes.get_IV(iv);
+
+    return aes.get_size();
+}
+
 bool Tracker::uploadInfo() {
     readBuffer.reset();
-    aes.iv_inc();
 
     // Check if the cell serial is up
     cellSerial.println(F("AT"));
@@ -52,23 +80,23 @@ bool Tracker::uploadInfo() {
         return false;
     }
 
-    aes.do_aes_encrypt(
-        readBuffer.getBuf(),
-        TrackerBufSize, 
-        cipherMessage,
-        ENCRYPTION_KEY,
-        ENCRYPTION_KEY_BITS);
+    byte iv[N_BLOCK];
+    int cipherSize = cipherMessage(aes, gpsLine, readBuffer, iv);
 
     cellSerial.print(F("AT+CIPSEND="));
-    cellSerial.print(sizeof(cipherMessage), 10);
+    cellSerial.print(sizeof(iv) + cipherSize, 10);
     cellSerial.println();
 
     // delay 1sec 
     // TODO wait for "> " prompt 
     delay(1000);
 
-    cellSerial.write(cipherMessage, sizeof(cipherMessage));
+    // Write IV and cipherMessage
+    cellSerial.write(iv, sizeof(iv));
+    cellSerial.write(readBuffer.getBuf(), cipherSize);
     cellSerial.println();
+
+    readBuffer.reset();
     if(!tryReadLine(F("SEND OK"), ShortReadTimeout)) {
         return false;
     }
