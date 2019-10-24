@@ -29,6 +29,8 @@ namespace Sim808 {
         void (*onInit)();
         void (*onReadGPS)();
         void (*onTransmit)();
+        void (*onError)();
+        void (*onFinish)();
     };
 }
 

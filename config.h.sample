@@ -3,3 +3,8 @@ const uint8_t ENCRYPTION_KEY[16] {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 const int ENCRYPTION_KEY_BITS = 128;
+
+const char apn[] PROGMEM = "some APN";
+const char user[] PROGMEM = "user";
+const char password[] PROGMEM = "password";
+const char host[] PROGMEM = "trackingserver";

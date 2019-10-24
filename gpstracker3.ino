@@ -1,13 +1,32 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include "Sim808Tracker.h"
+#include "config.h"
 
 extern HardwareSerial Serial;
 
-const char apn[] PROGMEM = "antel.lte";
-const char user[] PROGMEM = "";
-const char password[] PROGMEM = "";
-const char host[] PROGMEM = "home.ignacioavas.com";
+const int LED1 = 12;
+const int LED2 = 13;
+
+void onInit() {
+  digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, HIGH);
+}
+
+void onReadGPS() {
+  digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, LOW);
+}
+
+void onTransmit() {
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, HIGH);
+}
+
+void onFinish() {
+  digitalWrite(LED1, LOW);
+  digitalWrite(LED2, LOW);
+}
 
 const Sim808::Parameters params({ 
     .apn = apn,
@@ -17,15 +36,14 @@ const Sim808::Parameters params({
     .port = 35370,
     .receivePin = 2,
     .transmitPin = 3,
-    .onInit = NULL,
-    .onReadGPS = NULL,
-    .onTransmit = NULL
+    .onInit = &onInit,
+    .onReadGPS = &onReadGPS,
+    .onTransmit = &onTransmit,
+    .onError = &onFinish,
+    .onFinish = &onFinish,
 });
 
 Sim808::Tracker tracker(params);
-
-const int LED1 = 12;
-const int LED2 = 13;
 
 void setup() {
     // Initial Serial port communication

@@ -24,12 +24,20 @@ void Tracker::loop() {
     
 }
 
+void callFunc(void (*func)()) {
+    if(func) {
+        func();
+    }
+}
+
 void Tracker::run() {
     bool errorOnLastIteration = true;
     while(true) {
         if(errorOnLastIteration) {
             Serial.println(F("INIT"));
+            callFunc(parameters.onInit);
             if(!init()) {
+                callFunc(parameters.onError);
                 Serial.println(F("INIT PHASE FAIL"));
                 delay(ErrorDelay);
                 continue;
@@ -37,7 +45,9 @@ void Tracker::run() {
         }
         
         Serial.println(F("READ GPS"));
+        callFunc(parameters.onReadGPS);
         if(!readGPS()) {
+            callFunc(parameters.onError);
             Serial.println(F("READ GPS PHASE FAIL"));
             delay(ErrorDelay);
             errorOnLastIteration = true;
@@ -45,13 +55,16 @@ void Tracker::run() {
         }
 
         Serial.println(F("UPLOAD INFO"));
+        callFunc(parameters.onTransmit);
         if(!uploadInfo()) {
+            callFunc(parameters.onError);
             Serial.println(F("UPLOAD INFO PHASE FAIL"));
             delay(ErrorDelay);
             errorOnLastIteration = true;
             continue;
         }
 
+        callFunc(parameters.onFinish);
         errorOnLastIteration = false;
         delay(WindDownDelay);
     }
